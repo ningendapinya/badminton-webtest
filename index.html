@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badminton Queue & Matchmaker - Manual Spin Mode</title>
+    <title>Badminton Queue & Matchmaker - Optimized UI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Itim&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -19,9 +19,13 @@
             --muted-text: #94A3B8; 
             --light-gray: #334155; 
             --danger-color: #EF4444;
-            --danger-hover: #DC2626;
             --playing-bg: #064E3B; 
-            --waiting-bg: #451A03; 
+
+            /* สีใหม่สำหรับทีม A และ B */
+            --team-a-color: #3B82F6; /* สีฟ้า */
+            --team-a-bg: #EFF6FF;    /* สีฟ้าอ่อนมากสำหรับพื้นหลังช่องในคอร์ทขาว */
+            --team-b-color: #F59E0B; /* สีส้ม */
+            --team-b-bg: #FFFBEB;    /* สีส้มอ่อนมากสำหรับพื้นหลังช่องในคอร์ทขาว */
         }
 
         * {
@@ -48,15 +52,14 @@
 
         .app-container {
             display: grid;
-            grid-template-columns: 310px 1fr 310px;
+            grid-template-columns: 320px 1fr 320px;
             gap: 15px;
-            max-width: 1500px;
+            max-width: 1600px;
             width: 100%;
         }
 
         @media (max-width: 1024px) {
             .app-container { grid-template-columns: 1fr; }
-            .player-list-box { max-height: 400px !important; }
         }
 
         .box {
@@ -71,7 +74,7 @@
 
         h2 {
             font-family: 'Itim', cursive;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             margin-bottom: 12px;
             text-align: center;
             display: flex;
@@ -107,9 +110,9 @@
             align-items: center;
             justify-content: space-between;
             background: #0F172A;
-            padding: 8px 12px;
+            padding: 10px 12px;
             border-radius: 8px;
-            margin-top: 5px;
+            margin-bottom: 12px;
             font-size: 0.9rem;
             border: 1px solid var(--light-gray);
         }
@@ -134,108 +137,163 @@
         .btn-dark { background-color: #334155; color: white; border: 1px solid #475569; }
         .btn-dark:hover { background-color: #475569; }
 
-        .player-list-box { flex-grow: 1; max-height: 550px; }
-        .scroll-area { overflow-y: auto; flex-grow: 1; margin-top: 5px; padding-right: 3px; }
-        .scroll-area::-webkit-scrollbar { width: 5px; }
-        .scroll-area::-webkit-scrollbar-thumb { background: var(--light-gray); border-radius: 10px; }
+        /* 👥 โซนคนนั่งรอ: ล็อกไม่ให้มี Scrollbar แนวนอน */
+        .player-list-box { max-height: 380px; }
+        .player-list-grid { 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px; 
+            padding-bottom: 5px;
+            width: 100%;
+        }
 
         .player-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: #111827;
-            padding: 6px 10px; 
+            padding: 5px 6px; 
             border-radius: 8px;
-            margin-bottom: 6px;
             border: 1px solid var(--light-gray);
             cursor: grab;
             user-select: none;
+            font-size: 0.8rem;
+            overflow: hidden;
         }
         .player-item.is-resting { opacity: 0.3; background: #1E293B; cursor: not-allowed; }
 
-        .player-info { display: flex; align-items: center; gap: 8px; flex-grow: 1; font-size: 0.9rem; }
+        .player-info { display: flex; align-items: center; gap: 4px; flex-grow: 1; overflow: hidden; }
+        .toggle-checkbox { width: 14px; height: 14px; cursor: pointer; accent-color: var(--primary-color); flex-shrink: 0; }
+        .player-no { font-weight: 600; color: var(--primary-color); min-width: 12px; font-size: 0.75rem; text-align: center; }
         
-        .toggle-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary-color); }
-        .player-no { font-weight: 600; color: var(--primary-color); min-width: 18px; font-size: 0.85rem; }
+        /* ปรับสัดส่วนให้ชื่อฝั่งคนรอมีความยืดหยุ่นอ่านง่าย */
+        .player-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; min-width: 0; }
 
-        .player-tag { font-size: 0.7rem; padding: 1px 4px; border-radius: 4px; font-weight: 600; color: #FFF; }
+        .player-tag { font-size: 0.6rem; padding: 1px 3px; border-radius: 4px; font-weight: 600; color: #FFF; display: inline-block; flex-shrink: 0; }
         .tag-L3 { background: #DC2626; } 
         .tag-L2 { background: #D97706; } 
         .tag-L1 { background: #2563EB; } 
 
-        .game-counter { font-size: 0.8rem; color: var(--accent-orange); font-weight: 500; }
-
-        .btn-delete-member { background: none; border: none; color: #64748B; cursor: pointer; font-size: 1.2rem; width: 20px; text-align: center; }
+        .game-counter { font-size: 0.7rem; color: var(--accent-orange); font-weight: 500; flex-shrink: 0; }
+        .btn-delete-member { background: none; border: none; color: #64748B; cursor: pointer; font-size: 1rem; width: 14px; text-align: center; }
         .btn-delete-member:hover { color: var(--danger-color); }
 
-        /* โซนสนามตรงกลาง */
+        /* 🏸 โซนสนามตรงกลาง (ปรับเป็นสีสว่าง/สีขาวเพื่อความชัดเจน) */
         .courts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; align-content: start; }
         @media (max-width: 768px) { .courts-grid { grid-template-columns: 1fr; } }
         
         .court-card {
-            background: var(--card-color);
+            background: #FFFFFF; /* เปลี่ยนเป็นสีขาวเด่นตา */
             border-radius: 16px;
             padding: 12px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--light-gray);
+            border: 2px solid #E2E8F0;
         }
-        .court-card.drag-over { border-color: var(--primary-color); background: #022C22; }
+        .court-card.drag-over { border-color: var(--primary-color); background: #F0FDF4; }
 
-        .court-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed var(--light-gray); padding-bottom: 6px; }
-        .court-header h3 { font-family: 'Itim', cursive; font-size: 1.15rem; color: var(--primary-color); }
-        .court-status { font-size: 0.8rem; font-weight: 500; padding: 2px 6px; border-radius: 12px; background: #334155; color: #FFF; }
+        /* บังคับให้หัวข้อและข้อความในการ์ดขาวเปลี่ยนสีให้อ่านออก */
+        .court-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #CBD5E1; padding-bottom: 6px; }
+        .court-header h3 { font-family: 'Itim', cursive; font-size: 1.15rem; color: #0F172A; }
+        .court-status { font-size: 0.8rem; font-weight: 600; padding: 2px 8px; border-radius: 12px; background: #64748B; color: #FFF; }
         .court-status.playing { background: var(--playing-bg); color: #A7F3D0; border: 1px solid var(--primary-color); }
 
         .court-players { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
         
         .court-player-slot {
-            background: #0F172A;
+            background: #F8FAFC;
             padding: 8px 10px;
             border-radius: 6px;
             font-size: 0.85rem;
-            border: 1px dashed #475569;
+            border: 1px dashed #94A3B8;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            min-height: 38px;
+            min-height: 42px;
+            position: relative;
+            overflow: hidden;
         }
-        .court-player-slot.filled { border-style: solid; background: #1E293B; border-color: #475569; }
+        /* บังคับให้ตัวหนังสือ "ว่าง" ด้านในเป็นสีเทาเข้ม */
+        .court-player-slot { color: #64748B !important; }
 
-        .btn-kick { background: none; border: none; color: #F87171; font-weight: bold; cursor: pointer; font-size: 1.1rem; padding: 0 4px; }
-        .btn-kick:hover { color: var(--danger-color); }
+        .court-player-slot.filled { border-style: solid; }
+        /* บังคับสีข้อความชื่อผู้เล่นในสนามให้เป็นสีเข้ม */
+        .court-player-slot.filled .court-pname { color: #1E293B; font-weight: 600; }
+        /* สีข้อความตัวอักษรทีม */
+        .court-player-slot.filled .team-label { font-weight: bold; font-size: 0.9rem; }
+
+        .court-player-name-wrapper { 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+            flex-grow: 1; 
+            overflow: hidden; 
+            white-space: nowrap;
+            min-width: 0; 
+        }
+        
+        .court-pname { 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            flex-grow: 1;
+            min-width: 0;
+            cursor: help; 
+        }
+
+        .btn-kick { 
+            background: #FFFFFF; 
+            border: none; 
+            color: #F87171; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            padding: 0 6px; 
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            display: none;
+            align-items: center;
+            box-shadow: -5px 0 10px rgba(0,0,0,0.1);
+        }
+        .court-player-slot:hover .btn-kick { display: flex; }
+        .btn-kick:hover { color: var(--danger-color); background: #FEF2F2; }
 
         .court-actions {
             display: flex;
             gap: 5px;
             margin-top: 6px;
             padding-top: 6px;
-            border-top: 1px dashed var(--light-gray);
+            border-top: 1px dashed #CBD5E1;
         }
-        .select-drop { width: 75px; padding: 6px; border-radius: 6px; font-size: 0.8rem; background: #0F172A; border-color: var(--light-gray); }
+        /* ปรับสไตล์ Dropdown ในการ์ดขาว */
+        .select-drop { width: 75px; padding: 6px; border-radius: 6px; font-size: 0.8rem; background: #FFFFFF; border-color: #CBD5E1; color: #0F172A; }
+        .select-drop:focus { background: #FFFFFF; color: #0F172A; border-color: var(--primary-color); }
+        .select-drop option { background: #FFFFFF; color: #0F172A; }
         .btn-drop-out { background: var(--accent-orange); color: #0F172A; font-weight: bold; padding: 6px; font-size: 0.85rem; border-radius: 6px; width: auto; flex-grow: 1; }
+        .btn-drop-out:hover { background: #D97706; }
 
-        /* ตารางสถิติ */
+        /* ฝั่งขวา */
+        .stats-box { height: 340px; }
         .stats-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .stats-table th { text-align: left; padding: 4px; border-bottom: 2px solid var(--light-gray); color: var(--primary-color); }
-        .stats-table td { padding: 5px 4px; border-bottom: 1px solid #334155; }
+        .stats-table th { text-align: left; padding: 6px 4px; border-bottom: 2px solid var(--light-gray); color: var(--primary-color); }
+        .stats-table td { padding: 6px 4px; border-bottom: 1px solid #334155; }
         .stats-count { text-align: center; font-weight: bold; color: var(--accent-orange); }
 
-        /* กล่องแสดงทีมในคิวถัดไป */
+        .queue-box { flex-grow: 1; max-height: 300px; }
         .queue-item {
             background: #111827;
             border: 1px solid var(--light-gray);
             border-radius: 8px;
-            padding: 8px;
+            padding: 6px;
             margin-bottom: 6px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         .queue-item-header {
-            display: flex;
-            justify-content: space-between;
             color: var(--accent-orange);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin-bottom: 4px;
             font-weight: bold;
         }
@@ -246,10 +304,18 @@
         }
         .queue-p-box {
             background: #1E293B;
-            padding: 3px 6px;
+            padding: 3px 5px;
             border-radius: 4px;
-            border-left: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
         }
+        .queue-pname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; min-width: 0; }
+
+        .scroll-area { overflow-y: auto; flex-grow: 1; margin-top: 5px; padding-right: 3px; overflow-x: hidden; } 
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: var(--light-gray); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -257,18 +323,7 @@
     <div class="app-container">
         <div class="left-col">
             <div class="box">
-                <h2>🏸 เพิ่มสมาชิกใหม่</h2>
-                <div class="form-group">
-                    <input type="text" id="playerName" placeholder="พิมพ์ชื่อผู้เล่นใหม่...">
-                </div>
-                <div class="form-group">
-                    <select id="playerLevel">
-                        <option value="L2">L2 (ทั่วไป)</option>
-                        <option value="L3">L3 (มือสูง)</option>
-                        <option value="L1">L1 (มือใหม่)</option>
-                    </select>
-                </div>
-                <button class="btn-primary" id="btnAddPlayer">✨ เพิ่มผู้เล่น</button>
+                <h2>🏸 นัดแบดโรงรถ</h2>
                 
                 <div class="court-control-container">
                     <span>จำนวนสนามแบด</span>
@@ -277,18 +332,38 @@
                         <button style="width:28px; height:28px; padding:0;" class="btn-ctrl" id="btnPlusCourt">+</button>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <input type="text" id="playerName" placeholder="พิมพ์ชื่อผู้เล่นใหม่...">
+                </div>
+                <div class="form-group">
+                    <select id="playerLevel">
+                        <option value="L1">L1 (มือใหม่)</option>
+                        <option value="L2">L2 (ทั่วไป)</option>
+                        <option value="L3">L3 (มือแบก)</option>
+
+                    </select>
+                </div>
+                <button class="btn-primary" id="btnAddPlayer" style="margin-bottom: 12px;">➕ เพิ่มผู้เล่น</button>
+                
+                <hr style="border: 0; border-top: 1px dashed var(--light-gray); margin-bottom: 12px;">
+
+                <button class="btn-primary" id="btnAutoMatch" style="background-color: var(--accent-orange); margin-bottom: 6px;">🎲 กดเพื่อสุ่มทีม (Random Team)</button>
+                <button class="btn-dark" id="btnClearAll">🧹 ล้างข้อมูลคิวสนาม</button>
             </div>
 
             <div class="box player-list-box">
-                <h2>👥 คนนั่งรอเล่น (<span id="playerCount">0</span>)</h2>
-                <div class="scroll-area" id="playerList"></div>
+                <h2>🤹‍♀️ Player List  (<span id="playerCount">0</span>)</h2>
+                <div class="scroll-area">
+                    <div class="player-list-grid" id="playerList"></div>
+                </div>
             </div>
         </div>
 
         <div class="courts-grid" id="courtsGrid"></div>
 
         <div class="right-col">
-            <div class="box" style="max-height: 220px;">
+            <div class="box stats-box">
                 <h2>📊 สรุปจำนวนเกมวันนี้</h2>
                 <div class="scroll-area">
                     <table class="stats-table">
@@ -299,22 +374,15 @@
                     </table>
                 </div>
             </div>
-
-            <div class="box">
-                <h2>🤖 สุ่มจับคู่จัดทีม</h2>
-                <button class="btn-primary" id="btnAutoMatch" style="background-color: var(--accent-orange); margin-bottom: 6px;">🎲 กดสุ่มจัดทีม (Manual Spin)</button>
-                <button class="btn-dark" id="btnClearAll">🧹 ล้างข้อมูลคิวสนาม</button>
-            </div>
             
-            <div class="box" style="flex-grow: 1;">
-                <h2>⏳ คิวที่รอถัดไป</h2>
+            <div class="box queue-box">
+                <h2>⏳ คิวรอเกมถัดไป</h2>
                 <div class="scroll-area" id="waitingQueue"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // เริ่มต้นด้วยคน 14 คนตามตัวอย่างของคุณ
         let masterPlayers = [
             { id: 1, name: 'น้าดำ', level: 'L3', playedGames: 0, isAvailable: true },
             { id: 2, name: 'อาออฟ', level: 'L3', playedGames: 0, isAvailable: true },
@@ -371,12 +439,12 @@
                 }
 
                 item.innerHTML = `
-                    <div class="player-info">
+                    <div class="player-info" title="${player.name}">
                         <input type="checkbox" class="toggle-checkbox" ${player.isAvailable ? 'checked' : ''} onchange="togglePlayerStatus(${player.id})">
-                        <span class="player-no">${index + 1}.</span>
-                        <span style="font-weight:500;">${player.name}</span>
+                        <span class="player-no">${index + 1}</span>
+                        <span class="player-name">${player.name}</span>
                         <span class="player-tag tag-${player.level}">${player.level}</span>
-                        <span class="game-counter">[${player.playedGames} เกม]</span>
+                        <span class="game-counter">[${player.playedGames}]</span>
                     </div>
                     <button class="btn-delete-member" onclick="deletePlayer(${player.id})">×</button>
                 `;
@@ -406,7 +474,7 @@
             const queueContainer = document.getElementById('waitingQueue');
             queueContainer.innerHTML = '';
             if(waitingQueue.length === 0) {
-                queueContainer.innerHTML = '<div style="color:var(--muted-text); text-align:center; padding-top:20px; font-size:0.9rem;">ยังไม่มีคิวที่กดสุ่มรอไว้</div>';
+                queueContainer.innerHTML = '<div style="color:var(--muted-text); text-align:center; padding-top:20px; font-size:0.85rem;">ยังไม่มีคิวที่สุ่มไว้ </div>';
                 return;
             }
 
@@ -414,25 +482,21 @@
                 const qItem = document.createElement('div');
                 qItem.className = 'queue-item';
                 qItem.innerHTML = `
-                    <div class="queue-item-header">
-                        <span>MATCH คิวรอเล่นถัดไป ที่ ${index + 1}</span>
-                    </div>
+                    <div class="queue-item-header">MATCH คิวที่ ${index + 1}</div>
                     <div class="queue-players-grid">
-                        <div class="queue-p-box">${team[0].name} (${team[0].level})</div>
-                        <div class="queue-p-box">${team[1].name} (${team[1].level})</div>
-                        <div class="queue-p-box" style="border-color:var(--accent-orange)">${team[2].name} (${team[2].level})</div>
-                        <div class="queue-p-box" style="border-color:var(--accent-orange)">${team[3].name} (${team[3].level})</div>
+                        <div class="queue-p-box" style="border-left: 3px solid var(--team-a-color);" title="${team[0].name}"><span class="queue-pname" style="color:var(--dark-text);"><span style="color:var(--team-a-color); font-weight:bold;">A</span> ${team[0].name}</span> <span class="player-tag tag-${team[0].level}">${team[0].level}</span></div>
+                        <div class="queue-p-box" style="border-left: 3px solid var(--team-a-color);" title="${team[1].name}"><span class="queue-pname" style="color:var(--dark-text);"><span style="color:var(--team-a-color); font-weight:bold;">A</span> ${team[1].name}</span> <span class="player-tag tag-${team[1].level}">${team[1].level}</span></div>
+                        <div class="queue-p-box" style="border-left: 3px solid var(--team-b-color);" title="${team[2].name}"><span class="queue-pname" style="color:var(--dark-text);"><span style="color:var(--team-b-color); font-weight:bold;">B</span> ${team[2].name}</span> <span class="player-tag tag-${team[2].level}">${team[2].level}</span></div>
+                        <div class="queue-p-box" style="border-left: 3px solid var(--team-b-color);" title="${team[3].name}"><span class="queue-pname" style="color:var(--dark-text);"><span style="color:var(--team-b-color); font-weight:bold;">B</span> ${team[3].name}</span> <span class="player-tag tag-${team[3].level}">${team[3].level}</span></div>
                     </div>
                 `;
                 queueContainer.appendChild(qItem);
             });
         }
 
-        // ค้นหาผู้เล่นอิสระ (ที่ไม่ได้แข่งอยู่ และไม่ติดคิวรอ)
         function getReadyPlayersPoolOnly() {
             const busyIds = getAllBusyIds();
             let pool = masterPlayers.filter(p => !busyIds.includes(p.id) && p.isAvailable);
-            // เรียงให้คนที่เล่นน้อยที่สุดมีโอกาสโดนสุ่มสูงกว่า และสุ่มดวงผสม
             pool.sort((a, b) => {
                 if (a.playedGames !== b.playedGames) return a.playedGames - b.playedGames;
                 return 0.5 - Math.random();
@@ -449,7 +513,7 @@
                 const slots = activeMatches[i];
                 
                 const hasPlayers = slots.some(p => p !== null);
-                const statusText = slots.every(p => p !== null) ? 'กำลังแข่งขัน' : (hasPlayers ? 'คนไม่ครบ' : 'ว่าง');
+                const statusText = slots.every(p => p !== null) ? 'กำลังเล่น' : (hasPlayers ? 'คนไม่ครบ' : 'สนามว่าง');
                 const statusClass = slots.every(p => p !== null) ? 'court-status playing' : 'court-status';
 
                 const courtCard = document.createElement('div');
@@ -467,17 +531,24 @@
                 let slotsHTML = '';
                 for (let s = 0; s < 4; s++) {
                     const p = slots[s];
+                    // แยกทีมชัดเจน: s < 2 คือทีม A (0,1) , s >= 2 คือทีม B (2,3)
                     const sideLabel = s < 2 ? '🅰️' : '🅱️';
-                    const sideStyle = s < 2 ? 'border-left: 3px solid var(--primary-color);' : 'border-left: 3px solid var(--accent-orange);';
+                    const sideColor = s < 2 ? 'var(--team-a-color)' : 'var(--team-b-color)';
+                    const sideBg = s < 2 ? 'var(--team-a-bg)' : 'var(--team-b-bg)';
+                    const sideStyle = `border-left: 4px solid ${sideColor}; background-color: ${sideBg};`;
                     
                     if (p) {
                         slotsHTML += `
-                            <div class="court-player-slot filled" style="${sideStyle} font-weight:500;">
-                                <span>${sideLabel} ${p.name}</span>
+                            <div class="court-player-slot filled" style="${sideStyle}">
+                                <div class="court-player-name-wrapper" title="${p.name}">
+                                    <span class="team-label" style="color:${sideColor}; flex-shrink:0;">${sideLabel} </span>
+                                    <span class="court-pname">${p.name}</span>
+                                    <span class="player-tag tag-${p.level}">${p.level}</span>
+                                </div>
                                 <button class="btn-kick" onclick="kickPlayer(${i}, ${s})">×</button>
                             </div>`;
                     } else {
-                        slotsHTML += `<div class="court-player-slot" style="color:var(--muted-text); justify-content:center; font-size:0.8rem;">ว่าง (วางรายชื่อที่นี่)</div>`;
+                        slotsHTML += `<div class="court-player-slot" style="background-color: #F8FAFC; border: 1px dashed #CBD5E1; color:#94A3B8 !important; justify-content:center; font-size:0.8rem;">ว่าง</div>`;
                     }
                 }
 
@@ -487,31 +558,28 @@
                         <span class="${statusClass}">${statusText}</span>
                     </div>
                     <div class="court-players">${slotsHTML}</div>
-                    <button class="btn-primary" style="padding:8px; font-size:0.85rem; margin-bottom:4px;" onclick="finishMatch(${i})">🏸 จบเกมสนามนี้ (+1 เกมให้ผู้เล่น)</button>
+                    <button class="btn-primary" style="padding:8px; font-size:0.85rem; margin-bottom:4px;" onclick="finishMatch(${i})"> จบเกม  </button>
                     
                     <div class="court-actions">
                         <select class="select-drop" id="dropCount-${i}">
                             <option value="1">1 คน</option><option value="2">2 คน</option>
                             <option value="3">3 คน</option><option value="4">4 คน</option>
                         </select>
-                        <button class="btn-drop-out" onclick="randomDropPlayers(${i})">🎲 สุ่มคนพักและเติมคิว</button>
+                        <button class="btn-drop-out" onclick="randomDropPlayers(${i})">🎲 สุ่มคนพัก </button>
                     </div>
                 `;
                 courtsGridContainer.appendChild(courtCard);
             }
         }
 
-        // 🎲 ระบบกดสุ่มจัดทีมด้วยมือ (Manual Click) ตาม Logic ของคุณ
         document.getElementById('btnAutoMatch').addEventListener('click', () => {
             let pool = getReadyPlayersPoolOnly();
 
-            // ⚡ ด่านที่ 1: เช็คจำนวนคนนั่งรอที่เหลืออยู่ ถ้าไม่ถึง 4 คน ให้แจ้งเตือนตามที่คุณต้องการ
             if (pool.length < 4) {
-                alert('⚠️ รอผู้เล่นในสนามจบก่อน เพื่อทำการสุ่มนะ');
+                alert('⚠️ รอเพื่อนที่กำลังเล่นในสนามจบก่อน เพื่อทำการสุ่มนะ');
                 return;
             }
 
-            // ดึงกลุ่ม 4 คนแรกที่พร้อมที่สุดออกมาสุ่มเฉลี่ยระดับฝีมือ
             let selectedPool = pool.slice(0, 4);
             let bestDiff = Infinity;
             let finalTeam = [];
@@ -528,17 +596,14 @@
                 if (diff < bestDiff) { bestDiff = diff; finalTeam = [c.t[0], c.t[1], c.t[2], c.t[3]]; }
             });
 
-            // ⚡ ด่านที่ 2: ดูว่ามีคอร์ดแบดมินตันว่างสนิท (0 คน) ไหม
             let emptyCourtNum = null;
             for (let i = 1; i <= courtCount; i++) {
                 if (activeMatches[i].every(p => p === null)) { emptyCourtNum = i; break; }
             }
 
             if (emptyCourtNum) {
-                // หากมีสนามว่าง -> ส่ง 4 คนนี้ลงสนามนั้นทันที (เช่น การกดสุ่มครั้งที่ 1 และ 2 ของคุณ)
                 activeMatches[emptyCourtNum] = finalTeam;
             } else {
-                // หากสนามเต็มหมดแล้ว -> โยนกลุ่ม 4 คนนี้เข้า "คิวที่รอถัดไป" (เช่น การกดสุ่มครั้งที่ 3 ของคุณ)
                 waitingQueue.push(finalTeam);
             }
 
@@ -549,7 +614,7 @@
         function fillPlayerToCourtManual(courtNum, playerId) {
             let slots = activeMatches[courtNum];
             let playerIdx = slots.indexOf(null);
-            if (playerIdx === -1) { alert('สนามนี้คนเต็มแล้วครับ!'); return; }
+            if (playerIdx === -1) { alert('สนามนี้คนเต็มแล้วจย้า !'); return; }
             
             let player = masterPlayers.find(p => p.id === playerId);
             if (player) {
@@ -572,7 +637,7 @@
             let filledIndices = [];
             slots.forEach((p, idx) => { if(p !== null) filledIndices.push(idx); });
 
-            if (filledIndices.length === 0) { alert('สนามนี้ไม่มีคนให้สุ่มออกครับ!'); return; }
+            if (filledIndices.length === 0) { alert('สนามนี้ไม่มีคนให้สุ่มออก!'); return; }
 
             filledIndices.forEach(idx => {
                 let currentPlayer = slots[idx];
@@ -606,7 +671,6 @@
                 }
             });
 
-            // ดึงทีมที่เคยกดสุ่มค้างไว้ใน waitingQueue มาเข้าสนามต่อทันที
             if (waitingQueue.length > 0) {
                 activeMatches[courtNum] = waitingQueue.shift();
             } else {
@@ -635,6 +699,7 @@
         document.getElementById('btnPlusCourt').addEventListener('click', () => { courtCount++; renderCourts(); });
         document.getElementById('btnMinusCourt').addEventListener('click', () => { if (courtCount > 1) { courtCount--; renderCourts(); } });
         document.getElementById('btnClearAll').addEventListener('click', () => { activeMatches = {}; waitingQueue = []; renderCourts(); renderPlayers(); });
+	
 
         renderPlayers();
         renderCourts();
