@@ -149,13 +149,7 @@
             margin-bottom: 6px;
             border: 1px solid var(--light-gray);
             cursor: grab;
-            
-            /* แก้ไขปัญหาการก็อปปี้ข้อความและการแสดงเมนูบน Mobile บล็อกไม่ให้ขึ้นขอบไฮไลต์ค้าง */
             user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            -webkit-touch-callout: none;
         }
         .player-item.is-resting { opacity: 0.3; background: #1E293B; cursor: not-allowed; }
 
@@ -371,38 +365,8 @@
                 
                 if (player.isAvailable) {
                     item.setAttribute('draggable', 'true');
-                    
-                    // สำหรับเมาส์ (PC)
                     item.addEventListener('dragstart', (e) => {
                         e.dataTransfer.setData('text/plain', player.id);
-                    });
-
-                    // เพิ่มเติมส่วน Touch Events สำหรับระบบสัมผัส (iPad/iPhone/Android)
-                    item.addEventListener('touchstart', (e) => {
-                        item.style.opacity = '0.5'; 
-                    }, { passive: true });
-
-                    item.addEventListener('touchmove', (e) => {
-                        // บล็อกไม่ให้หน้าจอรวนหรือเลื่อนหนีในระหว่างที่เรากำลังพยายามลากตัวผู้เล่น
-                        if (e.cancelable) e.preventDefault(); 
-                    }, { passive: false });
-
-                    item.addEventListener('touchend', (e) => {
-                        item.style.opacity = '1'; 
-                        
-                        // ถอดพิกัดจุดที่เราปล่อยนิ้ว
-                        const touch = e.changedTouches[0];
-                        const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-                        const courtCard = targetElement ? targetElement.closest('.court-card') : null;
-                        
-                        if (courtCard) {
-                            const courtHeader = courtCard.querySelector('h3').innerText; 
-                            const courtNum = parseInt(courtHeader.replace(/^\D+/g, '')); 
-                            
-                            if (courtNum) {
-                                fillPlayerToCourtManual(courtNum, player.id);
-                            }
-                        }
                     });
                 }
 
@@ -537,15 +501,17 @@
             }
         }
 
-        // 🎲 ระบบกดสุ่มจัดทีมด้วยมือ (Manual Click)
+        // 🎲 ระบบกดสุ่มจัดทีมด้วยมือ (Manual Click) ตาม Logic ของคุณ
         document.getElementById('btnAutoMatch').addEventListener('click', () => {
             let pool = getReadyPlayersPoolOnly();
 
+            // ⚡ ด่านที่ 1: เช็คจำนวนคนนั่งรอที่เหลืออยู่ ถ้าไม่ถึง 4 คน ให้แจ้งเตือนตามที่คุณต้องการ
             if (pool.length < 4) {
                 alert('⚠️ รอผู้เล่นในสนามจบก่อน เพื่อทำการสุ่มนะ');
                 return;
             }
 
+            // ดึงกลุ่ม 4 คนแรกที่พร้อมที่สุดออกมาสุ่มเฉลี่ยระดับฝีมือ
             let selectedPool = pool.slice(0, 4);
             let bestDiff = Infinity;
             let finalTeam = [];
@@ -562,14 +528,17 @@
                 if (diff < bestDiff) { bestDiff = diff; finalTeam = [c.t[0], c.t[1], c.t[2], c.t[3]]; }
             });
 
+            // ⚡ ด่านที่ 2: ดูว่ามีคอร์ดแบดมินตันว่างสนิท (0 คน) ไหม
             let emptyCourtNum = null;
             for (let i = 1; i <= courtCount; i++) {
                 if (activeMatches[i].every(p => p === null)) { emptyCourtNum = i; break; }
             }
 
             if (emptyCourtNum) {
+                // หากมีสนามว่าง -> ส่ง 4 คนนี้ลงสนามนั้นทันที (เช่น การกดสุ่มครั้งที่ 1 และ 2 ของคุณ)
                 activeMatches[emptyCourtNum] = finalTeam;
             } else {
+                // หากสนามเต็มหมดแล้ว -> โยนกลุ่ม 4 คนนี้เข้า "คิวที่รอถัดไป" (เช่น การกดสุ่มครั้งที่ 3 ของคุณ)
                 waitingQueue.push(finalTeam);
             }
 
@@ -637,6 +606,7 @@
                 }
             });
 
+            // ดึงทีมที่เคยกดสุ่มค้างไว้ใน waitingQueue มาเข้าสนามต่อทันที
             if (waitingQueue.length > 0) {
                 activeMatches[courtNum] = waitingQueue.shift();
             } else {
