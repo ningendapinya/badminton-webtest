@@ -248,10 +248,12 @@
             players = [];
             queues = [];
             
-            for (let i = 1; i <= 19; i++) {
+            const playerNames = ['มิว', 'อาท', 'น้าดำ', 'มาย', 'นิ้ง', 'ตั้ม', 'น้ำแข็ง', 'เก่ง', 'มัดหมี่', 'ก้อง', 'น่ง', 'มิกซ์', 'เมย์', 'นะ', 'เดียร์', 'อาโย', 'แบม', 'บอม', 'พี่โต้ง', 'พี่แชมป์'];
+            
+            for (let i = 0; i < playerNames.length; i++) {
                 players.push({
-                    id: i,
-                    name: `นาย ${i}`,
+                    id: i + 1,
+                    name: playerNames[i],
                     level: 'L2',
                     gamesPlayed: 0,
                     history: {}, 
@@ -460,7 +462,7 @@
         }
 
         function matchmake() {
-            // 4. เงื่อนไขเพิ่มเติม: ตรวจสอบว่ามีคอร์ดว่าง (Active และไม่มีคนเล่น) อย่างน้อย 1 คอร์ด และไม่มีคิวรออยู่ในระบบ
+            // 4. เงื่อนไขเพิ่มเติม: ตรวจสอบว่ามีคอร์ดว่าง (Active และไม่มีคนเล่น) อย่างน้อย 1 ค��ร์ด และไม่มีคิวรออยู่ในระบบ
             let hasEmptyCourt = courts.some(c => c.isActive && !c.teamA[0] && !c.teamA[1] && !c.teamB[0] && !c.teamB[1]);
             
             if (!hasEmptyCourt || queues.length > 0) {
@@ -764,8 +766,9 @@
                 let isCourtEmpty = !c.teamA[0] && !c.teamA[1] && !c.teamB[0] && !c.teamB[1];
                  let statusLabel = isCourtEmpty ? '<span class="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded">ว่าง</span>' : '<span class="text-xs text-amber-400 bg-amber-950/50 border border-amber-900 px-2 py-0.5 rounded animate-pulse">กำลังแข่ง</span>';
                 
-                // 2. ปุ่มไซเรนฉุกเฉินแสดงไฟกระพริบแดงแบบกระสือ
-                let emergencyBtnClass = c.emergency ? "siren-glowing text-red-500 scale-110" : "text-slate-600 grayscale opacity-50 hover:opacity-100";
+                // ปุ่มเปิด/ปิดคอร์ด (ไม่ใช่ emergency)
+                let toggleBtnIcon = c.isActive ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-circle-xmark"></i>';
+                let toggleBtnColor = c.isActive ? 'text-emerald-400 hover:text-emerald-300' : 'text-rose-400 hover:text-rose-300';
 
                 div.innerHTML = `
                      <div class="flex justify-between items-center mb-3">
@@ -774,11 +777,10 @@
                             ${statusLabel}
                         </div>
                         <div class="flex items-center gap-2">
-                             <label class="toggle-switch" title="${c.isActive ? 'คอร์ดเปิด' : 'คอร์ดปิด'}">
-                                <input type="checkbox" ${c.isActive ? 'checked' : ''} onchange="toggleCourtActive(${c.id})">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <button onclick="toggleEmergency(${c.id})" class="transition duration-200 ${emergencyBtnClass}" title="Emergency Mode">
+                             <button onclick="toggleCourtActive(${c.id})" class="transition duration-200 ${toggleBtnColor} text-xl" title="${c.isActive ? 'ปิดคอร์ด' : 'เปิดคอร์ด'}">
+                                ${toggleBtnIcon}
+                            </button>
+                            <button onclick="toggleEmergency(${c.id})" class="transition duration-200 ${c.emergency ? 'siren-glowing text-red-500 scale-110' : 'text-slate-600 grayscale opacity-50 hover:opacity-100'}" title="Emergency Mode">
                                  <i class="fa-solid fa-lightbulb text-xl"></i>
                             </button>
                         </div>
